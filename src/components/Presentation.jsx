@@ -170,7 +170,7 @@ const Presentation = () => {
           url: 'https://www.perplexity.ai',
           logo: PerplexityLogo,
           logoColor: BRAND_COLORS.Perplexity,
-          content: "Don't just "Google it." Perplexity gives you a direct answer with citations. Great for checking competitors, market trends, or finding local suppliers instantly."
+          content: `Don't just "Google it." Perplexity gives you a direct answer with citations. Great for checking competitors, market trends, or finding local suppliers instantly.`
         },
         {
           title: 'NotebookLM',
@@ -188,7 +188,7 @@ const Presentation = () => {
       title: 'Practical Use Cases',
       subtitle: 'How different groups can use these tools tomorrow.',
       items: [
-        { title: 'Hospitality', icon: '🏨', desc: 'Lodging & Dining', use: 'Drafting event menus, writing "Things to do" guides for guests.' },
+        { title: 'Hospitality', icon: '🏨', desc: 'Lodging & Dining', use: `Drafting event menus, writing "Things to do" guides for guests.` },
         { title: 'Real Estate', icon: '🏡', desc: 'Agents & Managers', use: 'Turning rough notes into polished listing descriptions. Market analysis.' },
         { title: 'Trades', icon: '🛠️', desc: 'Contractors', use: 'Drafting professional estimates. Safety checklists. Payment emails.' },
         { title: 'Libraries', icon: '📚', desc: 'Community Hubs', use: 'Creating reading lists. Summarizing articles. Event brainstorming.' },
