@@ -217,7 +217,7 @@ const Presentation = () => {
         { label: 'Privacy', text: 'Never put client passwords or banking info into public AI.', icon: Lock },
         { label: 'Verification', text: 'AI can hallucinate (lie). Always fact-check numbers.', icon: Search },
         { label: 'Ownership', text: 'You generally own the output, but laws are evolving.', icon: FileText },
-        { label: 'Disclosure', text: 'If AI writes a blog, it's good ethics to review/edit it first.', icon: Eye }
+        { label: 'Disclosure', text: `If AI writes a blog, it's good ethics to review/edit it first.`, icon: Eye }
       ]
     },
     {
