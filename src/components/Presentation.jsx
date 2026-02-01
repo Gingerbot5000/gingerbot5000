@@ -23,6 +23,67 @@ import {
   FileText
 } from 'lucide-react';
 
+// --- BRAND LOGOS (SVG Components) ---
+
+// ChatGPT Logo - OpenAI style
+const ChatGPTLogo = ({ size = 40 }) => (
+  <svg width={size} height={size} viewBox="0 0 41 41" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M37.5324 16.8707C37.9808 15.5241 38.1363 14.0974 37.9886 12.6859C37.8409 11.2744 37.3934 9.91076 36.676 8.68622C35.6126 6.83404 33.9882 5.3676 32.0373 4.4985C30.0864 3.62941 27.9098 3.40259 25.8215 3.85078C24.8796 2.7893 23.7219 1.94125 22.4257 1.36341C21.1295 0.785575 19.7249 0.491269 18.3058 0.500879C16.1708 0.495378 14.0893 1.16447 12.3614 2.41142C10.6335 3.65837 9.34853 5.41893 8.68544 7.43155C7.30101 7.58717 5.96906 8.01095 4.76959 8.67485C3.57012 9.33876 2.52944 10.2275 1.70869 11.2859C0.597709 12.6866 -0.136172 14.3413 -0.425712 16.0979C-0.715251 17.8546 -0.551099 19.6558 0.050834 21.3321C-0.397722 22.6787 -0.553188 24.1054 -0.405543 25.5169C-0.257898 26.9284 0.189594 28.292 0.906813 29.5166C1.97037 31.3688 3.59483 32.8352 5.54574 33.7043C7.49666 34.5734 9.67327 34.8002 11.7615 34.352C12.7034 35.4135 13.8611 36.2615 15.1573 36.8394C16.4535 37.4172 17.8581 37.7115 19.2772 37.7019C21.4119 37.7077 23.4932 37.0389 25.221 35.7922C26.9489 34.5455 28.2338 32.7853 28.8972 30.7731C30.2816 30.6175 31.6135 30.1937 32.813 29.5298C34.0125 28.8659 35.0531 27.9771 35.8739 26.9187C36.9844 25.518 37.7181 23.8634 38.0074 22.107C38.2968 20.3506 38.1324 18.5497 37.5324 16.8707ZM19.2772 35.1921C17.8282 35.1974 16.4082 34.7983 15.1733 34.0402C15.2121 34.0184 15.2844 33.977 15.3354 33.9456L22.7791 29.6478C22.9719 29.5375 23.1319 29.3773 23.2425 29.1845C23.353 28.9917 23.4104 28.773 23.409 28.551V17.9742L26.6317 19.8357C26.6478 19.8443 26.6617 19.8564 26.6722 19.8711C26.6828 19.8858 26.6897 19.9026 26.6924 19.9203V28.6636C26.6896 30.3949 26.0025 32.0541 24.7785 33.2778C23.5545 34.5015 21.8952 35.1891 20.1639 35.1921H19.2772ZM5.54866 28.8846C4.82481 27.6193 4.52569 26.1553 4.69642 24.7093C4.73286 24.7329 4.80245 24.7782 4.85745 24.8096L12.3011 29.1074C12.4922 29.2206 12.7105 29.2803 12.9329 29.2803C13.1554 29.2803 13.3737 29.2206 13.5647 29.1074L22.7169 23.8229V27.546C22.7174 27.5644 22.7134 27.5827 22.7052 27.5994C22.6969 27.6161 22.6848 27.6307 22.6697 27.6418L15.1401 32.0042C13.6383 32.8704 11.8834 33.1802 10.1801 32.8804C8.47679 32.5806 6.93642 31.6906 5.83016 30.3676L5.54866 28.8846ZM3.58219 13.2346C4.30008 11.9667 5.41936 10.9692 6.76344 10.3986C6.76344 10.4422 6.76086 10.5256 6.76086 10.5885V19.1836C6.75967 19.4053 6.81716 19.6237 6.92749 19.8163C7.03782 20.0089 7.19739 20.1693 7.38979 20.2803L16.5421 25.5649L13.3194 27.4264C13.3041 27.436 13.2868 27.4419 13.2689 27.4436C13.2509 27.4454 13.2328 27.443 13.2161 27.4366L5.68141 23.0711C4.18165 22.2029 3.03233 20.8375 2.43163 19.2122C1.83092 17.5869 1.81685 15.8022 2.39216 14.1676L3.58219 13.2346ZM30.1171 20.7197L20.9649 15.4352L24.1875 13.5737C24.2028 13.5641 24.2202 13.5582 24.2381 13.5565C24.256 13.5547 24.2741 13.5571 24.2909 13.5636L31.8255 17.929C32.8702 18.5302 33.7391 19.3961 34.3438 20.4392C34.9485 21.4822 35.2671 22.6666 35.2671 23.8721C35.2671 25.0776 34.9485 26.262 34.3438 27.305C33.7391 28.3481 32.8702 29.214 31.8255 29.8152V21.419C31.8247 21.1974 31.7655 20.9797 31.6541 20.7876C31.5426 20.5956 31.3826 20.4359 31.1903 20.3256L30.1171 20.7197ZM33.3191 14.2909C33.2822 14.2674 33.2126 14.222 33.1576 14.1907L25.7139 9.89283C25.5229 9.77971 25.3046 9.71994 25.0821 9.71994C24.8597 9.71994 24.6413 9.77971 24.4503 9.89283L15.2981 15.1774V11.4543C15.2975 11.4359 15.3016 11.4176 15.3099 11.4009C15.3181 11.3842 15.3302 11.3696 15.3454 11.3585L22.8749 6.9961C23.9196 6.39475 25.1066 6.07604 26.3146 6.07604C27.5226 6.07604 28.7096 6.39475 29.7543 6.9961C30.7991 7.59746 31.668 8.46336 32.2727 9.50641C32.8774 10.5495 33.196 11.7339 33.196 12.9394C33.196 13.404 33.1529 13.8641 33.0699 14.3142L33.3191 14.2909ZM14.0843 23.0261L10.8617 21.1646C10.8457 21.156 10.8318 21.1439 10.8212 21.1292C10.8107 21.1145 10.8037 21.0976 10.801 21.08V12.3366C10.8013 11.1297 11.1209 9.94404 11.7273 8.90055C12.3337 7.85706 13.2047 6.99182 14.2516 6.39252C15.2984 5.79322 16.4861 5.48021 17.6933 5.48629C18.9005 5.49237 20.0849 5.81729 21.1256 6.42708C21.0868 6.44894 21.0145 6.49031 20.9635 6.52165L13.5198 10.8195C13.327 10.9298 13.167 11.09 13.0565 11.2828C12.9459 11.4756 12.8885 11.6943 12.8899 11.9163L14.0843 23.0261ZM15.2981 19.5L18.9945 17.3656L22.6909 19.5V23.769L18.9945 25.9036L15.2981 23.769V19.5Z" fill="currentColor"/>
+  </svg>
+);
+
+// Claude Logo - Anthropic style
+const ClaudeLogo = ({ size = 40 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17.302 3.928c-.403-.958-1.312-1.512-2.455-1.512H9.153c-1.143 0-2.052.554-2.455 1.512L3.013 12l3.685 8.072c.403.958 1.312 1.512 2.455 1.512h5.694c1.143 0 2.052-.554 2.455-1.512L20.987 12l-3.685-8.072Z" fill="currentColor"/>
+    <path d="M12 16.5a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Z" fill="#0f172a"/>
+  </svg>
+);
+
+// Gemini Logo - Google style
+const GeminiLogo = ({ size = 40 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="url(#gemini-gradient)"/>
+    <defs>
+      <linearGradient id="gemini-gradient" x1="2" y1="12" x2="22" y2="12">
+        <stop stopColor="#4285F4"/>
+        <stop offset="0.33" stopColor="#9B72CB"/>
+        <stop offset="0.66" stopColor="#D96570"/>
+        <stop offset="1" stopColor="#F9AB00"/>
+      </linearGradient>
+    </defs>
+    <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z" fill="white" fillOpacity="0.3"/>
+  </svg>
+);
+
+// Perplexity Logo
+const PerplexityLogo = ({ size = 40 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="24" height="24" rx="4" fill="currentColor"/>
+    <path d="M12 4L4 8v8l8 4 8-4V8l-8-4z" stroke="#0f172a" strokeWidth="1.5" fill="none"/>
+    <path d="M12 4v16M4 8l8 4 8-4M4 16l8-4 8 4" stroke="#0f172a" strokeWidth="1.5"/>
+  </svg>
+);
+
+// NotebookLM Logo - Google style
+const NotebookLMLogo = ({ size = 40 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="4" y="2" width="16" height="20" rx="2" fill="currentColor"/>
+    <path d="M8 6h8M8 10h8M8 14h5" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round"/>
+    <circle cx="17" cy="17" r="4" fill="#FBBC04"/>
+    <path d="M15.5 17l1 1 2-2" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+// Logo color mapping
+const BRAND_COLORS = {
+  ChatGPT: '#10a37f',
+  Claude: '#cc785c',
+  Gemini: '#4285F4',
+  Perplexity: '#20808D',
+  NotebookLM: '#EA4335'
+};
+
 const Presentation = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const slideRef = useRef(null);
@@ -70,6 +131,8 @@ const Presentation = () => {
           brand: 'OpenAI',
           url: 'https://chatgpt.com',
           badge: 'The All-Rounder',
+          logo: ChatGPTLogo,
+          logoColor: BRAND_COLORS.ChatGPT,
           description: 'Best for logical reasoning, data analysis, and following strict instructions.',
           features: ['DALL-E 3 Images', 'Voice Mode', 'Data Analysis']
         },
@@ -78,6 +141,8 @@ const Presentation = () => {
           brand: 'Anthropic',
           url: 'https://claude.ai',
           badge: 'The Writer',
+          logo: ClaudeLogo,
+          logoColor: BRAND_COLORS.Claude,
           description: 'Most "human" writing style. Excellent at coding and safe, nuanced responses.',
           features: ['Large Context', 'Coding', 'Creative Writing']
         },
@@ -86,6 +151,8 @@ const Presentation = () => {
           brand: 'Google',
           url: 'https://gemini.google.com',
           badge: 'The Integrator',
+          logo: GeminiLogo,
+          logoColor: BRAND_COLORS.Gemini,
           description: 'Connected to Google Workspace. Fastest processing speed for large files.',
           features: ['Google Docs/Drive', 'Video Analysis', 'Web Search']
         }
@@ -101,14 +168,16 @@ const Presentation = () => {
           title: 'Perplexity',
           brand: 'The Search Engine Killer',
           url: 'https://www.perplexity.ai',
-          icon: Globe,
+          logo: PerplexityLogo,
+          logoColor: BRAND_COLORS.Perplexity,
           content: "Don't just "Google it." Perplexity gives you a direct answer with citations. Great for checking competitors, market trends, or finding local suppliers instantly."
         },
         {
           title: 'NotebookLM',
           brand: 'The Private Analyst',
           url: 'https://notebooklm.google.com',
-          icon: BookOpen,
+          logo: NotebookLMLogo,
+          logoColor: BRAND_COLORS.NotebookLM,
           content: 'A "walled garden." Upload YOUR documents (PDFs, price lists). It answers questions ONLY using your data. Zero hallucinations.'
         }
       ]
@@ -325,6 +394,25 @@ const Presentation = () => {
     <div className="flex flex-col items-center justify-center min-h-full px-6 py-12 z-10 relative">
         <div className="max-w-5xl w-full grid md:grid-cols-2 gap-12 items-center">
             <div className="text-center md:text-left space-y-8">
+                {/* Profile Photo */}
+                <div className="flex justify-center md:justify-start mb-4">
+                    <div className="relative">
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-orange-500 rounded-full blur-lg opacity-50" />
+                        <img
+                            src="/images/adam-gurski.jpg"
+                            alt="Adam Gurski"
+                            className="relative w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-slate-800 shadow-2xl"
+                            onError={(e) => {
+                                e.target.style.display = 'none';
+                                e.target.nextSibling.style.display = 'flex';
+                            }}
+                        />
+                        {/* Fallback avatar */}
+                        <div className="hidden relative w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-blue-500 to-orange-500 items-center justify-center text-4xl md:text-5xl font-bold text-white border-4 border-slate-800 shadow-2xl">
+                            AG
+                        </div>
+                    </div>
+                </div>
                 <div>
                     <h2 className="text-4xl md:text-6xl font-black text-white mb-2">{slide.title}</h2>
                     <p className="text-2xl md:text-3xl text-blue-400 font-light">{slide.subtitle}</p>
@@ -377,19 +465,25 @@ const Presentation = () => {
             className="group relative bg-slate-900 border border-slate-800 rounded-2xl p-1 overflow-hidden hover:-translate-y-2 transition-all duration-300 hover:shadow-[0_0_40px_rgba(59,130,246,0.15)] flex flex-col h-full"
           >
             {/* Top Border Highlight */}
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute top-0 left-0 w-full h-1 opacity-0 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: card.logoColor }} />
 
             <div className="p-6 flex flex-col h-full">
                 <div className="flex justify-between items-start mb-6">
-                    <div>
-                        <h3 className="text-3xl font-bold text-white mb-1 group-hover:text-blue-400 transition-colors">{card.title}</h3>
-                        <p className="text-sm font-mono text-slate-500 uppercase">{card.brand}</p>
+                    <div className="flex items-center gap-4">
+                        {/* Brand Logo */}
+                        <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 group-hover:border-slate-700 transition-colors" style={{ color: card.logoColor }}>
+                            {card.logo && <card.logo size={32} />}
+                        </div>
+                        <div>
+                            <h3 className="text-2xl font-bold text-white mb-1 group-hover:text-blue-400 transition-colors">{card.title}</h3>
+                            <p className="text-sm font-mono text-slate-500 uppercase">{card.brand}</p>
+                        </div>
                     </div>
                     <ExternalLink className="text-slate-600 group-hover:text-orange-500 transition-colors" size={20} />
                 </div>
 
                 <div className="mb-6">
-                    <span className="inline-block py-1 px-3 rounded text-xs font-bold uppercase tracking-wider bg-slate-800 text-blue-300 border border-slate-700">
+                    <span className="inline-block py-1 px-3 rounded text-xs font-bold uppercase tracking-wider bg-slate-800 border border-slate-700" style={{ color: card.logoColor }}>
                         {card.badge}
                     </span>
                 </div>
@@ -399,7 +493,7 @@ const Presentation = () => {
                 <div className="space-y-3 pt-6 border-t border-slate-800">
                     {card.features.map((feat, j) => (
                         <div key={j} className="flex items-center gap-3 text-sm text-slate-300">
-                            <div className="w-1.5 h-1.5 rounded-full bg-orange-500" />
+                            <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: card.logoColor }} />
                             {feat}
                         </div>
                     ))}
@@ -424,19 +518,20 @@ const Presentation = () => {
             href={card.url}
             target="_blank"
             rel="noreferrer"
-            className="group bg-slate-900 border border-slate-800 hover:border-orange-500/50 rounded-3xl p-8 flex flex-col hover:bg-slate-800/50 transition-all duration-300"
+            className="group bg-slate-900 border border-slate-800 rounded-3xl p-8 flex flex-col hover:bg-slate-800/50 transition-all duration-300"
+            style={{ '--hover-color': card.logoColor }}
           >
             <div className="flex items-start justify-between mb-6">
                 <div className="flex items-center gap-4">
-                    <div className="p-4 bg-slate-950 rounded-xl text-orange-500 border border-slate-800 group-hover:border-orange-500/30 transition-colors">
-                        <card.icon size={32} />
+                    <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 group-hover:border-opacity-50 transition-colors" style={{ color: card.logoColor, borderColor: card.logoColor + '30' }}>
+                        {card.logo && <card.logo size={36} />}
                     </div>
                     <div>
-                        <h3 className="text-2xl font-bold text-white group-hover:text-orange-400 transition-colors">{card.title}</h3>
+                        <h3 className="text-2xl font-bold text-white transition-colors" style={{ color: 'white' }}>{card.title}</h3>
                         <p className="text-sm text-slate-500 uppercase font-bold tracking-wide">{card.brand}</p>
                     </div>
                 </div>
-                <ExternalLink className="text-slate-700 group-hover:text-orange-500 transition-colors" />
+                <ExternalLink className="text-slate-700 transition-colors" style={{ color: card.logoColor }} />
             </div>
             <p className="text-lg text-slate-300 leading-relaxed">{card.content}</p>
           </a>
