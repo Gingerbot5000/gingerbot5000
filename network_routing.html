@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mesh Network Routing — Blueprint</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #05131a;
+    overflow: hidden;
+    font-family: 'Courier New', ui-monospace, monospace;
+    color: #9cf;
+  }
+  canvas {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+  }
+  #hud {
+    position: fixed;
+    top: 18px;
+    left: 22px;
+    font-size: 12px;
+    line-height: 1.6;
+    letter-spacing: 0.06em;
+    text-shadow: 0 0 8px rgba(0, 229, 255, 0.45);
+    pointer-events: none;
+    user-select: none;
+  }
+  #hud .title {
+    color: #00e5ff;
+    font-weight: bold;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+  }
+  #hud .sub {
+    color: #6cc;
+    opacity: 0.85;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+  }
+  #hud .route {
+    margin-top: 8px;
+    font-size: 13px;
+  }
+  #hud .hop {
+    color: #3a7a85;
+    padding: 1px 2px;
+    transition: color 0.15s;
+  }
+  #hud .hop.visited {
+    color: #0bd;
+    text-shadow: 0 0 6px rgba(0, 200, 230, 0.6);
+  }
+  #hud .hop.active {
+    color: #ffffff;
+    text-shadow: 0 0 12px #00e5ff, 0 0 4px #fff;
+  }
+  #hud .arrow {
+    color: #1a4a55;
+    padding: 0 5px;
+  }
+  #legend {
+    position: fixed;
+    bottom: 16px;
+    right: 22px;
+    font-size: 10px;
+    color: #4aa;
+    opacity: 0.65;
+    letter-spacing: 0.18em;
+    pointer-events: none;
+    user-select: none;
+    text-align: right;
+    line-height: 1.6;
+  }
+  #corner {
+    position: fixed;
+    bottom: 16px;
+    left: 22px;
+    font-size: 10px;
+    color: #4aa;
+    opacity: 0.65;
+    letter-spacing: 0.18em;
+    pointer-events: none;
+    user-select: none;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+<canvas id="net"></canvas>
+
+<div id="hud">
+  <div class="title">◆ BLUEPRINT//NET v1.2</div>
+  <div class="sub">MESH ROUTING · ACTIVE LINK MONITOR</div>
+  <div class="route" id="route"></div>
+</div>
+
+<div id="corner">NODES: 08 · LINKS: 14 · PROTO: TCP/BP</div>
+<div id="legend">
+  <div>SIGNAL: STABLE</div>
+  <div>LAT: 12ms · PKT: OK</div>
+</div>
+
+<script>
+(() => {
+  const canvas = document.getElementById('net');
+  const ctx = canvas.getContext('2d');
+  const hudRoute = document.getElementById('route');
+
+  // ---------- Graph definition ----------
+  // Normalized coordinates (0..1), scaled to canvas on draw.
+  const nodes = {
+    CLIENT: { x: 0.08, y: 0.50, label: 'CLIENT', type: 'endpoint' },
+    R1:     { x: 0.26, y: 0.22, label: 'R1',     type: 'router'   },
+    R2:     { x: 0.26, y: 0.78, label: 'R2',     type: 'router'   },
+    R3:     { x: 0.46, y: 0.38, label: 'R3',     type: 'router'   },
+    R4:     { x: 0.46, y: 0.64, label: 'R4',     type: 'router'   },
+    R5:     { x: 0.68, y: 0.22, label: 'R5',     type: 'router'   },
+    R6:     { x: 0.68, y: 0.78, label: 'R6',     type: 'router'   },
+    SERVER: { x: 0.90, y: 0.50, label: 'SERVER', type: 'endpoint' }
+  };
+
+  // Undirected edges — mesh with several client↔server paths.
+  const edges = [
+    ['CLIENT', 'R1'], ['CLIENT', 'R2'],
+    ['R1', 'R3'], ['R1', 'R5'],
+    ['R2', 'R4'], ['R2', 'R6'],
+    ['R3', 'R4'], ['R3', 'R5'], ['R3', 'R6'],
+    ['R4', 'R5'], ['R4', 'R6'],
+    ['R5', 'R6'],
+    ['R5', 'SERVER'], ['R6', 'SERVER']
+  ];
+
+  // Adjacency map
+  const adj = {};
+  for (const id in nodes) adj[id] = [];
+  for (const [a, b] of edges) {
+    adj[a].push(b);
+    adj[b].push(a);
+  }
+
+  // ---------- Path discovery ----------
+  function findAllPaths(start, end) {
+    const result = [];
+    const visited = new Set();
+    (function dfs(cur, path) {
+      if (cur === end) {
+        result.push(path.slice());
+        return;
+      }
+      visited.add(cur);
+      for (const next of adj[cur]) {
+        if (!visited.has(next)) {
+          path.push(next);
+          dfs(next, path);
+          path.pop();
+        }
+      }
+      visited.delete(cur);
+    })(start, [start]);
+    return result;
+  }
+
+  // Keep paths of moderate length (3–5 hops) for visual interest.
+  let allPaths = findAllPaths('CLIENT', 'SERVER')
+    .filter(p => p.length >= 3 && p.length <= 5);
+
+  // Shuffle for variety
+  for (let i = allPaths.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [allPaths[i], allPaths[j]] = [allPaths[j], allPaths[i]];
+  }
+
+  // ---------- Canvas sizing ----------
+  let W = 0, H = 0, DPR = 1;
+  function resize() {
+    DPR = window.devicePixelRatio || 1;
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = W * DPR;
+    canvas.height = H * DPR;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // ---------- Helpers ----------
+  const pxOf = (id) => {
+    const n = nodes[id];
+    // Use margin so nodes stay inside the viewport
+    const mx = 60, my = 60;
+    return {
+      x: mx + n.x * (W - mx * 2),
+      y: my + n.y * (H - my * 2)
+    };
+  };
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const smoothstep = (t) => t * t * (3 - 2 * t);
+
+  // ---------- Animation state ----------
+  let pathIdx = 0;
+  let currentPath = allPaths[0];
+  let hopIdx = 0;
+  let hopStart = 0;
+  const HOP_DURATION = 750; // ms per edge
+  const PAUSE_AT_END = 900; // ms pause at destination
+  let phase = 'HOP';        // 'HOP' | 'PAUSE'
+  let pauseStart = 0;
+
+  // Packet trail (ring buffer of recent positions)
+  const trail = [];
+  const TRAIL_LEN = 24;
+
+  function startNewPath(now) {
+    currentPath = allPaths[pathIdx % allPaths.length];
+    pathIdx++;
+    hopIdx = 0;
+    hopStart = now;
+    phase = 'HOP';
+    trail.length = 0;
+  }
+
+  // ---------- Edge classification ----------
+  function isActiveEdge(aId, bId) {
+    if (phase !== 'HOP') return false;
+    const pa = currentPath[hopIdx];
+    const pb = currentPath[hopIdx + 1];
+    if (!pa || !pb) return false;
+    return (aId === pa && bId === pb) || (aId === pb && bId === pa);
+  }
+
+  function isVisitedEdge(aId, bId) {
+    const limit = phase === 'PAUSE' ? currentPath.length - 1 : hopIdx;
+    for (let i = 0; i < limit; i++) {
+      const pa = currentPath[i];
+      const pb = currentPath[i + 1];
+      if ((aId === pa && bId === pb) || (aId === pb && bId === pa)) return true;
+    }
+    return false;
+  }
+
+  // ---------- Drawing ----------
+  function drawGrid() {
+    ctx.save();
+    // Fine grid
+    ctx.strokeStyle = 'rgba(13, 58, 74, 0.55)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    const step = 40;
+    for (let x = 0; x <= W; x += step) {
+      ctx.moveTo(x + 0.5, 0);
+      ctx.lineTo(x + 0.5, H);
+    }
+    for (let y = 0; y <= H; y += step) {
+      ctx.moveTo(0, y + 0.5);
+      ctx.lineTo(W, y + 0.5);
+    }
+    ctx.stroke();
+
+    // Accent gridlines every 4 cells
+    ctx.strokeStyle = 'rgba(20, 100, 120, 0.38)';
+    ctx.beginPath();
+    for (let x = 0; x <= W; x += step * 4) {
+      ctx.moveTo(x + 0.5, 0);
+      ctx.lineTo(x + 0.5, H);
+    }
+    for (let y = 0; y <= H; y += step * 4) {
+      ctx.moveTo(0, y + 0.5);
+      ctx.lineTo(W, y + 0.5);
+    }
+    ctx.stroke();
+
+    // Faint vignette corners (blueprint border)
+    ctx.strokeStyle = 'rgba(0, 229, 255, 0.25)';
+    ctx.lineWidth = 1;
+    const b = 28, c = 18;
+    ctx.beginPath();
+    ctx.moveTo(b, b + c); ctx.lineTo(b, b); ctx.lineTo(b + c, b);
+    ctx.moveTo(W - b - c, b); ctx.lineTo(W - b, b); ctx.lineTo(W - b, b + c);
+    ctx.moveTo(b, H - b - c); ctx.lineTo(b, H - b); ctx.lineTo(b + c, H - b);
+    ctx.moveTo(W - b - c, H - b); ctx.lineTo(W - b, H - b); ctx.lineTo(W - b, H - b - c);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawEdges(timeMs) {
+    ctx.save();
+    ctx.lineCap = 'round';
+
+    // Pass 1: inactive edges
+    for (const [a, b] of edges) {
+      if (isActiveEdge(a, b) || isVisitedEdge(a, b)) continue;
+      const pa = pxOf(a), pb = pxOf(b);
+      ctx.strokeStyle = 'rgba(10, 122, 143, 0.7)';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.moveTo(pa.x, pa.y);
+      ctx.lineTo(pb.x, pb.y);
+      ctx.stroke();
+    }
+
+    // Pass 2: visited edges
+    for (const [a, b] of edges) {
+      if (!isVisitedEdge(a, b) || isActiveEdge(a, b)) continue;
+      const pa = pxOf(a), pb = pxOf(b);
+      ctx.strokeStyle = 'rgba(0, 200, 230, 0.6)';
+      ctx.lineWidth = 2;
+      ctx.shadowColor = '#00aacc';
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.moveTo(pa.x, pa.y);
+      ctx.lineTo(pb.x, pb.y);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+
+    // Pass 3: active edge (drawn last, on top, with dash shimmer)
+    for (const [a, b] of edges) {
+      if (!isActiveEdge(a, b)) continue;
+      const pa = pxOf(a), pb = pxOf(b);
+
+      // Underglow
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.35)';
+      ctx.lineWidth = 6;
+      ctx.shadowColor = '#00e5ff';
+      ctx.shadowBlur = 28;
+      ctx.beginPath();
+      ctx.moveTo(pa.x, pa.y);
+      ctx.lineTo(pb.x, pb.y);
+      ctx.stroke();
+
+      // Core line with moving dashes
+      ctx.strokeStyle = '#e7ffff';
+      ctx.lineWidth = 2.5;
+      ctx.shadowBlur = 18;
+      ctx.setLineDash([12, 8]);
+      ctx.lineDashOffset = -((timeMs / 28) % 1000);
+      ctx.beginPath();
+      ctx.moveTo(pa.x, pa.y);
+      ctx.lineTo(pb.x, pb.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.shadowBlur = 0;
+    }
+
+    ctx.restore();
+  }
+
+  function drawNode(id, pulse, timeMs) {
+    const p = pxOf(id);
+    const n = nodes[id];
+    const isEndpoint = n.type === 'endpoint';
+    const baseR = isEndpoint ? 22 : 15;
+    const r = baseR + (pulse || 0);
+
+    ctx.save();
+
+    // Outer ring pulse ring (for packet location or destination)
+    if (pulse > 0.1) {
+      ctx.strokeStyle = `rgba(0, 229, 255, ${Math.max(0, 0.6 - pulse * 0.08)})`;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, r + 8 + pulse * 2, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    // Shape
+    ctx.shadowColor = '#00e5ff';
+    ctx.shadowBlur = 16;
+    ctx.fillStyle = '#001f2a';
+    ctx.strokeStyle = '#00e5ff';
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+    if (isEndpoint) {
+      // Hex for endpoints
+      const sides = 6;
+      for (let i = 0; i < sides; i++) {
+        const ang = (Math.PI * 2 * i) / sides - Math.PI / 2;
+        const vx = p.x + Math.cos(ang) * r;
+        const vy = p.y + Math.sin(ang) * r;
+        if (i === 0) ctx.moveTo(vx, vy);
+        else ctx.lineTo(vx, vy);
+      }
+      ctx.closePath();
+    } else {
+      ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+    }
+    ctx.fill();
+    ctx.stroke();
+
+    // Inner core dot
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(0, 229, 255, 0.9)';
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, isEndpoint ? 4 : 2.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Cross-hatch brackets for endpoints (blueprint marker)
+    if (isEndpoint) {
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.55)';
+      ctx.lineWidth = 1;
+      const br = r + 6;
+      ctx.beginPath();
+      ctx.moveTo(p.x - br, p.y - br + 5); ctx.lineTo(p.x - br, p.y - br); ctx.lineTo(p.x - br + 5, p.y - br);
+      ctx.moveTo(p.x + br - 5, p.y - br); ctx.lineTo(p.x + br, p.y - br); ctx.lineTo(p.x + br, p.y - br + 5);
+      ctx.moveTo(p.x - br, p.y + br - 5); ctx.lineTo(p.x - br, p.y + br); ctx.lineTo(p.x - br + 5, p.y + br);
+      ctx.moveTo(p.x + br - 5, p.y + br); ctx.lineTo(p.x + br, p.y + br); ctx.lineTo(p.x + br, p.y + br - 5);
+      ctx.stroke();
+    }
+
+    // Label
+    ctx.fillStyle = isEndpoint ? '#cffbff' : '#9ff';
+    ctx.font = `${isEndpoint ? 12 : 11}px "Courier New", ui-monospace, monospace`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.shadowColor = 'rgba(0, 229, 255, 0.6)';
+    ctx.shadowBlur = 8;
+    ctx.fillText(n.label, p.x, p.y + r + 10);
+
+    ctx.restore();
+  }
+
+  function drawNodes(timeMs) {
+    const destId = currentPath[currentPath.length - 1];
+    const destPulse = phase === 'PAUSE'
+      ? Math.max(0, 6 - ((timeMs - pauseStart) / PAUSE_AT_END) * 6) + Math.sin(timeMs / 70) * 1.5
+      : 0;
+
+    for (const id in nodes) {
+      let pulse = 0;
+      if (phase === 'PAUSE' && id === destId) pulse = destPulse;
+      drawNode(id, pulse, timeMs);
+    }
+  }
+
+  function drawTrail() {
+    ctx.save();
+    ctx.shadowColor = '#00e5ff';
+    for (let i = 0; i < trail.length; i++) {
+      const t = trail[i];
+      const a = (i + 1) / trail.length;
+      ctx.globalAlpha = a * 0.55;
+      ctx.shadowBlur = 16 * a;
+      ctx.fillStyle = '#baffff';
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, 1.5 + a * 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawPacket(pos) {
+    ctx.save();
+
+    // Outer glow halo
+    const grad = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, 22);
+    grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    grad.addColorStop(0.25, 'rgba(150, 240, 255, 0.9)');
+    grad.addColorStop(0.6, 'rgba(0, 229, 255, 0.5)');
+    grad.addColorStop(1, 'rgba(0, 229, 255, 0)');
+    ctx.fillStyle = grad;
+    ctx.shadowColor = '#00e5ff';
+    ctx.shadowBlur = 32;
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, 22, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Core
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  function currentPacketPosition(timeMs) {
+    if (phase === 'PAUSE') {
+      return pxOf(currentPath[currentPath.length - 1]);
+    }
+    const pa = currentPath[hopIdx];
+    const pb = currentPath[hopIdx + 1];
+    const A = pxOf(pa), B = pxOf(pb);
+    let t = (timeMs - hopStart) / HOP_DURATION;
+    if (t > 1) t = 1;
+    const e = smoothstep(t);
+    return { x: lerp(A.x, B.x, e), y: lerp(A.y, B.y, e) };
+  }
+
+  // ---------- HUD ----------
+  function updateHUD() {
+    const totalHops = currentPath.length - 1;
+    const currentHop = phase === 'PAUSE' ? totalHops : Math.min(hopIdx + 1, totalHops);
+    let html = '<span class="sub">ROUTE ' +
+      String(((pathIdx - 1) % allPaths.length) + 1).padStart(2, '0') +
+      '/' + String(allPaths.length).padStart(2, '0') +
+      ' · HOP ' + currentHop + '/' + totalHops + '</span><br>';
+    html += '<span class="title" style="font-size:12px;">▸ </span>';
+
+    for (let i = 0; i < currentPath.length; i++) {
+      const id = currentPath[i];
+      let cls = 'hop';
+      if (phase === 'PAUSE') {
+        if (i === currentPath.length - 1) cls += ' active';
+        else cls += ' visited';
+      } else {
+        if (i <= hopIdx) cls += ' visited';
+        else if (i === hopIdx + 1) cls += ' active';
+      }
+      html += '<span class="' + cls + '">' + nodes[id].label + '</span>';
+      if (i < currentPath.length - 1) html += '<span class="arrow">→</span>';
+    }
+    hudRoute.innerHTML = html;
+  }
+
+  // ---------- Main loop ----------
+  function frame(timeMs) {
+    // Initialize hopStart on first frame
+    if (hopStart === 0 && phase === 'HOP') hopStart = timeMs;
+
+    // State update
+    if (phase === 'HOP') {
+      const t = (timeMs - hopStart) / HOP_DURATION;
+      if (t >= 1) {
+        hopIdx++;
+        if (hopIdx >= currentPath.length - 1) {
+          phase = 'PAUSE';
+          pauseStart = timeMs;
+        } else {
+          hopStart = timeMs;
+        }
+      }
+    } else if (phase === 'PAUSE') {
+      if (timeMs - pauseStart >= PAUSE_AT_END) {
+        startNewPath(timeMs);
+      }
+    }
+
+    // Update packet + trail
+    const pos = currentPacketPosition(timeMs);
+    if (phase === 'HOP') {
+      trail.push({ x: pos.x, y: pos.y });
+      if (trail.length > TRAIL_LEN) trail.shift();
+    } else {
+      // Fade trail during pause
+      if (trail.length) trail.shift();
+    }
+
+    // Paint
+    ctx.fillStyle = '#05131a';
+    ctx.fillRect(0, 0, W, H);
+    drawGrid();
+    drawEdges(timeMs);
+    drawTrail();
+    drawNodes(timeMs);
+    drawPacket(pos);
+
+    updateHUD();
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
